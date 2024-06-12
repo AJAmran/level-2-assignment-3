@@ -1,24 +1,21 @@
-import mongoose, { Model, Schema } from 'mongoose';
-
-type UserRole = 'user' | 'admin';
+import { Schema, model } from 'mongoose';
 
 type User = {
-    name: string;
-    email: string;
-    password: string;
-    phone: string;
-    role: UserRole;
-    address: string;
+  name: string;
+  email: string;
+  password: string;
+  phone: string;
+  address: string;
+  role: 'user' | 'admin';
 };
 
-const UserSchema = new Schema<User>({
-    name: String,
-    email: { type: String, unique: true },
-    password: String,
-    phone: String,
-    role: { type: String, enum: ['user', 'admin'], default: 'user' },
-    address: String
+const userSchema = new Schema<User>({
+  name: { type: String, required: true },
+  email: { type: String, required: true, unique: true },
+  password: { type: String, required: true },
+  phone: { type: String, required: true },
+  address: { type: String, required: true },
+  role: { type: String, required: true, enum: ['user', 'admin'] }
 });
 
-const UserModel: Model<User> = mongoose.model('User', UserSchema);
-export default UserModel;
+export default model<User>('User', userSchema);

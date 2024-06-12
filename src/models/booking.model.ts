@@ -1,22 +1,19 @@
-import mongoose, { Model, Schema } from 'mongoose';
+import { Schema, model, Types } from 'mongoose';
 
 type Booking = {
-    date: string;
-    slots: mongoose.Types.ObjectId[];
-    room: mongoose.Types.ObjectId;
-    user: mongoose.Types.ObjectId;
-    totalAmount: number;
-    isConfirmed: 'unconfirmed' | 'confirmed';
+  room: Types.ObjectId;
+  slots: Types.ObjectId[];
+  user: Types.ObjectId;
+  totalAmount: number;
+  isConfirmed: 'unconfirmed' | 'confirmed' | 'cancelled';
 };
 
-const BookingSchema = new Schema<Booking>({
-    date: String,
-    slots: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Slot' }],
-    room: { type: mongoose.Schema.Types.ObjectId, ref: 'Room' },
-    user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-    totalAmount: Number,
-    isConfirmed: { type: String, enum: ['unconfirmed', 'confirmed'], default: 'unconfirmed' }
+const bookingSchema = new Schema<Booking>({
+  room: { type: Schema.Types.ObjectId, ref: 'Room', required: true },
+  slots: [{ type: Schema.Types.ObjectId, ref: 'Slot', required: true }],
+  user: { type: Schema.Types.ObjectId, ref: 'User', required: true },
+  totalAmount: { type: Number, required: true },
+  isConfirmed: { type: String, default: 'unconfirmed' }
 });
 
-const BookingModel: Model<Booking> = mongoose.model('Booking', BookingSchema);
-export default BookingModel;
+export default model<Booking>('Booking', bookingSchema);

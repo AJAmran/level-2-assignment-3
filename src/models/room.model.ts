@@ -1,24 +1,23 @@
-import mongoose, { Model, Schema } from 'mongoose';
+import { Schema, model } from "mongoose";
 
 type Room = {
-    name: string;
-    roomNo: number;
-    floorNo: number;
-    capacity: number;
-    pricePerSlot: number;
-    amenities: string[];
-    isDeleted: boolean;
+  name: string;
+  roomNo: number;
+  floorNo: number;
+  capacity: number;
+  pricePerSlot: number;
+  amenities: string[];
+  isDeleted: boolean;
 };
 
-const RoomSchema = new Schema<Room>({
-    name: String,
-    roomNo: Number,
-    floorNo: Number,
-    capacity: Number,
-    pricePerSlot: Number,
-    amenities: [String],
-    isDeleted: { type: Boolean, default: false }
+const roomSchema = new Schema<Room>({
+  name: { type: String, required: true },
+  roomNo: { type: Number, required: true },
+  floorNo: { type: Number, required: true },
+  capacity: { type: Number, required: true },
+  pricePerSlot: { type: Number, required: true },
+  amenities: { type: [String], required: true },
+  isDeleted: { type: Boolean, default: false },
 });
 
-const RoomModel: Model<Room> = mongoose.model('Room', RoomSchema);
-export default RoomModel;
+export default model<Room>("Room", roomSchema);
