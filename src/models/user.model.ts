@@ -1,4 +1,4 @@
-import { Schema, model } from 'mongoose';
+import { Schema, model } from "mongoose";
 
 type User = {
   name: string;
@@ -6,7 +6,7 @@ type User = {
   password: string;
   phone: string;
   address: string;
-  role: 'user' | 'admin';
+  role: "user" | "admin";
 };
 
 const userSchema = new Schema<User>({
@@ -15,7 +15,8 @@ const userSchema = new Schema<User>({
   password: { type: String, required: true },
   phone: { type: String, required: true },
   address: { type: String, required: true },
-  role: { type: String, required: true, enum: ['user', 'admin'] }
+  role: { type: String, enum: ["user", "admin"], default: "user" },
 });
 
-export default model<User>('User', userSchema);
+const UserModel = model<User>("User", userSchema);
+export default UserModel;

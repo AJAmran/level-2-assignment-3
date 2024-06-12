@@ -1,4 +1,4 @@
-import { Schema, model, Types } from 'mongoose';
+import { Schema, model, Types } from "mongoose";
 
 type Slot = {
   room: Types.ObjectId;
@@ -9,11 +9,13 @@ type Slot = {
 };
 
 const slotSchema = new Schema<Slot>({
-  room: { type: Schema.Types.ObjectId, ref: 'Room', required: true },
+  room: { type: Schema.Types.ObjectId, ref: "Room", required: true },
   date: { type: Date, required: true },
   startTime: { type: String, required: true },
   endTime: { type: String, required: true },
-  isBooked: { type: Boolean, default: false }
+  isBooked: { type: Boolean, default: false },
 });
 
-export default model<Slot>('Slot', slotSchema);
+const SlotModel = model<Slot>("Slot", slotSchema);
+
+export default SlotModel;
