@@ -1,21 +1,23 @@
-import { Schema, model, Types } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-type Slot = {
-  room: Types.ObjectId;
-  date: Date;
+type SlotType = {
+  room: mongoose.Types.ObjectId;
+  date: string;
   startTime: string;
   endTime: string;
   isBooked: boolean;
 };
 
-const slotSchema = new Schema<Slot>({
-  room: { type: Schema.Types.ObjectId, ref: "Room", required: true },
-  date: { type: Date, required: true },
-  startTime: { type: String, required: true },
-  endTime: { type: String, required: true },
-  isBooked: { type: Boolean, default: false },
-});
+const slotSchema = new Schema<SlotType>(
+  {
+    room: { type: Schema.Types.ObjectId, ref: "Room", required: true },
+    date: { type: String, required: true },
+    startTime: { type: String, required: true },
+    endTime: { type: String, required: true },
+    isBooked: { type: Boolean, default: false },
+  },
+  { timestamps: true }
+);
 
-const SlotModel = model<Slot>("Slot", slotSchema);
-
-export default SlotModel;
+const Slot = mongoose.model("Slot", slotSchema);
+export default Slot;

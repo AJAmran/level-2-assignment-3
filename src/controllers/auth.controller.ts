@@ -1,38 +1,24 @@
 import { Request, Response } from "express";
-import bcrypt from "bcryptjs";
+import { loginSchema, signupSchema } from "../utils/validators";
+import User from "../models/user.model";
 
-import jwt from "jsonwebtoken";
-import dotenv from "dotenv";
-import UserModel from "../models/user.model";
+// Register User
+export const registerUser = async (req: Request, res: Response) => {
+  const parsed = signupSchema.safeParse(req.body);
+  if (!parsed.success)
+    return res.status(400).json({ error: parsed.error.errors });
 
-dotenv.config();
+  const { name, email, password, phone, address, role } = req.body;
 
-const jwtSecret = process.env.JWT_SECRET!;
-
-export const signUp = async (req: Request, res: Response) => {
   try {
-    const { name, email, password, phone, address, role } = req.body;
-    if (!name || !email || !password || !phone || !address || !role) {
-      return res
-        .status(400)
-        .json({ success: false, message: "All fields are required" });
-    }
-    const existingUser = await UserModel.findOne({ email });
-    if (existingUser) {
-      return res
-        .status(400)
-        .json({ success: false, message: "User already exists" });
-    }
-    const hashedPassword = await bcrypt.hash(password, 10);
-    const user = await UserModel.create({
+    const user = await User.create({
       name,
       email,
-      password: hashedPassword,
+      password,
       phone,
       address,
       role,
     });
-
     res.status(200).json({
       success: true,
       statusCode: 200,
@@ -46,40 +32,34 @@ export const signUp = async (req: Request, res: Response) => {
         address: user.address,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };
 
-export const logIn = async (req: Request, res: Response) => {
-  try {
-    const { email, password } = req.body;
-    if (!email || !password) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Email and password are required" });
-    }
-    const user = await UserModel.findOne({ email });
-    if (!user) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid credentials" });
-    }
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) {
-      return res
-        .status(400)
-        .json({ success: false, message: "Invalid credentials" });
-    }
-    const token = jwt.sign({ id: user._id, role: user.role }, jwtSecret, {
-      expiresIn: "1h",
-    });
+// Login User
+export const loginUser = async (req: Request, res: Response) => {
+  const parsed = loginSchema.safeParse(req.body);
+  if (!parsed.success)
+    return res.status(400).json({ error: parsed.error.errors });
 
+  const { email, password } = req.body;
+
+  try {
+    const user = await User.findOne({ email });
+
+    if (!user || !(await user.comparePassword(password))) {
+      return res
+        .status(401)
+        .json({ success: false, message: "Invalid credentials" });
+    }
+
+    const token = user.getSignedJwtToken();
     res.status(200).json({
       success: true,
       statusCode: 200,
       message: "User logged in successfully",
-      token: `Bearer ${token}`,
+      token: token,
       data: {
         _id: user._id,
         name: user.name,
@@ -89,7 +69,7 @@ export const logIn = async (req: Request, res: Response) => {
         address: user.address,
       },
     });
-  } catch (error: any) {
+  } catch (error) {
     res.status(500).json({ success: false, message: error.message });
   }
 };

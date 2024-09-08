@@ -1,24 +1,27 @@
-import { Schema, model, Types } from "mongoose";
+import mongoose, { Schema } from "mongoose";
 
-type Booking = {
-  room: Types.ObjectId;
-  slots: Types.ObjectId[];
-  user: Types.ObjectId;
+type BookingType = {
+  room: mongoose.Types.ObjectId;
+  slots: mongoose.Types.ObjectId[];
+  user: mongoose.Types.ObjectId;
+  date: string;
   totalAmount: number;
-  isConfirmed: "unconfirmed" | "confirmed" | "cancelled";
+  isConfirmed: string;
+  isDeleted: boolean;
 };
 
-const bookingSchema = new Schema<Booking>({
-  room: { type: Schema.Types.ObjectId, ref: "Room", required: true },
-  slots: [{ type: Schema.Types.ObjectId, ref: "Slot", required: true }],
-  user: { type: Schema.Types.ObjectId, ref: "User", required: true },
-  totalAmount: { type: Number, required: true },
-  isConfirmed: {
-    type: String,
-    enum: ["unconfirmed", "confirmed", "canceled"],
-    default: "unconfirmed",
+const bookingSchema = new Schema<BookingType>(
+  {
+    room: { type: Schema.Types.ObjectId, ref: "Room", required: true },
+    slots: { type: [Schema.Types.ObjectId], ref: "Slot", required: true },
+    user: { type: Schema.Types.ObjectId, ref: "User", required: true },
+    date: { type: String, required: true },
+    totalAmount: { type: Number, required: true },
+    isConfirmed: { type: String, enum: ["confirmed", "unconfirmed", "canceled"], default: "unconfirmed" },
+    isDeleted: { type: Boolean, default: false },
   },
-});
+  { timestamps: true }
+);
 
-const BookingModel = model<Booking>("Booking", bookingSchema);
-export default BookingModel;
+const Booking = mongoose.model("Booking", bookingSchema);
+export default Booking;
