@@ -67,7 +67,7 @@ app.get("/", (req, res) => {
       <li><strong>Admin Features:</strong> Manage rooms, create slots, and oversee bookings as an admin.</li>
     </ul>
     <a href="/api/auth/login">Login</a>
-    <a href="/api/auth/register">Register</a>
+    <a href="/api/auth/signup">Register</a>
   `);
 });
 // Error Handler
