@@ -1,6 +1,7 @@
 import { Request, Response } from "express";
 import { loginSchema, signupSchema } from "../utils/validators";
 import User from "../models/user.model";
+import { errorResponse, successResponse } from "../utils/responseHandler";
 
 // Register User
 export const registerUser = async (req: Request, res: Response) => {
@@ -11,6 +12,11 @@ export const registerUser = async (req: Request, res: Response) => {
   const { name, email, password, phone, address, role } = req.body;
 
   try {
+    const userExists = await User.findOne({ email });
+    if (userExists) {
+      return errorResponse(res, "User already exists", [], 400);
+    }
+
     const user = await User.create({
       name,
       email,
@@ -19,11 +25,11 @@ export const registerUser = async (req: Request, res: Response) => {
       address,
       role,
     });
-    res.status(200).json({
-      success: true,
-      statusCode: 200,
-      message: "User registered successfully",
-      data: {
+
+    return successResponse(
+      res,
+      "User registered successfully",
+      {
         _id: user._id,
         name: user.name,
         email: user.email,
@@ -31,9 +37,10 @@ export const registerUser = async (req: Request, res: Response) => {
         role: user.role,
         address: user.address,
       },
-    });
+      201
+    );
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return errorResponse(res, (error as Error).message);
   }
 };
 
@@ -55,21 +62,21 @@ export const loginUser = async (req: Request, res: Response) => {
     }
 
     const token = user.getSignedJwtToken();
-    res.status(200).json({
-      success: true,
-      statusCode: 200,
-      message: "User logged in successfully",
-      token: token,
-      data: {
+    return successResponse(
+      res,
+      "User logged in successfully",
+      {
         _id: user._id,
         name: user.name,
         email: user.email,
         phone: user.phone,
         role: user.role,
         address: user.address,
+        token,
       },
-    });
+      200
+    );
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return errorResponse(res, (error as Error).message);
   }
 };

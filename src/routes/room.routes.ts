@@ -14,7 +14,7 @@ router.route("/").post(protect, admin, createRoom).get(getAllRooms);
 
 router
   .route("/:id")
-  .get(protect, admin, getSingleRoom)
+  .get(protect, getSingleRoom)
   .put(protect, admin, updateRoom)
   .delete(protect, admin, deleteRoom);
 

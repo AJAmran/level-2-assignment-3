@@ -23,14 +23,23 @@ export const protect = async (
       .json({ success: false, message: "No token provided" });
 
   try {
-    const decoded = jwt.verify(token, JWT_SECRET || "") as any;
-    req.user = await User.findById(decoded.id);
+    const decoded = jwt.verify(token, JWT_SECRET || "") as { id: string };
+    const user = await User.findById(decoded.id);
+    if (!user) {
+      return res
+        .status(401)
+        .json({ success: false, message: "User not found" });
+    }
+    req.user = user; // This should be correct with updated type
     next();
   } catch (error) {
-    return res.status(401).json({ success: false, message: "Not authorized" });
+    return res.status(401).json({
+      success: false,
+      statusCode: 401,
+      message: "You have no access to this route",
+    });
   }
 };
-
 export const admin = (req: Request, res: Response, next: NextFunction) => {
   if (req.user?.role !== "admin") {
     return res

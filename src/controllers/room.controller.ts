@@ -1,5 +1,6 @@
 import { Request, Response } from "express";
 import Room from "../models/room.model";
+import { errorResponse, successResponse } from "../utils/responseHandler";
 
 //create room (Admin only)
 export const createRoom = async (req: Request, res: Response) => {
@@ -14,14 +15,9 @@ export const createRoom = async (req: Request, res: Response) => {
       pricePerSlot,
       amenities,
     });
-    res.status(201).json({
-      success: true,
-      statusCode: 200,
-      message: "Room added successfully",
-      data: room,
-    });
+    return successResponse(res, "Room added successfully", room, 201);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return errorResponse(res, (error as Error).message);
   }
 };
 
@@ -29,13 +25,17 @@ export const createRoom = async (req: Request, res: Response) => {
 export const getAllRooms = async (req: Request, res: Response) => {
   try {
     const rooms = await Room.find({ isDeleted: false });
-    res.status(200).json({
-      statusCode: 200,
-      message: "Room retrieved successfully",
-      data: rooms,
-    });
+    if (rooms.length === 0) {
+      return res.status(404).json({
+        success: false,
+        statusCode: 404,
+        message: "No Data Found",
+        data: [],
+      });
+    }
+    return successResponse(res, "Rooms retrieved successfully", rooms);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return errorResponse(res, (error as Error).message);
   }
 };
 
@@ -47,14 +47,9 @@ export const getSingleRoom = async (req: Request, res: Response) => {
       return res
         .status(404)
         .json({ success: false, message: "Room not found" });
-    res.status(200).json({
-      success: true,
-      statusCode: 200,
-      message: "Room retrieved successfully",
-      data: room,
-    });
+    return successResponse(res, "Room retrieved successfully", room);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return errorResponse(res, (error as Error).message);
   }
 };
 
@@ -69,14 +64,9 @@ export const updateRoom = async (req: Request, res: Response) => {
         .status(404)
         .json({ success: false, message: "Room not found" });
 
-    res.status(200).json({
-      success: true,
-      statusCode: 200,
-      message: "Room updated successfully",
-      data: room,
-    });
+    return successResponse(res, "Room updated successfully", room);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return errorResponse(res, (error as Error).message);
   }
 };
 
@@ -93,12 +83,8 @@ export const deleteRoom = async (req: Request, res: Response) => {
       return res
         .status(404)
         .json({ success: false, message: "Room not found" });
-    res.status(200).json({
-      statusCode: 200,
-      message: "Room deleted successfully",
-      data: room,
-    });
+    return successResponse(res, "Room deleted successfully", room);
   } catch (error) {
-    res.status(500).json({ success: false, message: error.message });
+    return errorResponse(res, (error as Error).message);
   }
 };

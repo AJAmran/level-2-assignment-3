@@ -1,28 +1,26 @@
-import { Request, Response, NextFunction } from 'express';
+import { Request, Response } from "express";
 
-const errorHandler = (
-  err: Error,
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
-  console.error(err.stack);
-  res.status(500).json({
+const errorHandler = (err: any, _req: Request, res: Response) => {
+  let statusCode = res.statusCode === 200 ? 500 : res.statusCode;
+
+  // Handling MongoDB Duplicate Key Error
+  if (err.code === 11000) {
+    statusCode = 400;
+    err.message = `Duplicate Key Error: ${Object.keys(err.keyValue)} already exists`;
+  }
+
+  // Send Detailed Error Response
+  res.status(statusCode).json({
     success: false,
-    message: 'Internal Server Error',
-    error: err.message,
+    message: err.message || "Internal Server Error",
+    errorMessages: err.errors
+      ? Object.values(err.errors).map((error: any) => ({
+          path: error.path,
+          message: error.message,
+        }))
+      : [],
+    stack: process.env.NODE_ENV === "development" ? err.stack : null,
   });
 };
 
-const notFoundHandler = (
-  req: Request,
-  res: Response,
-  next: NextFunction
-): void => {
-  res.status(404).json({
-    success: false,
-    message: 'Not Found',
-  });
-};
-
-export { errorHandler, notFoundHandler };
+export default errorHandler;

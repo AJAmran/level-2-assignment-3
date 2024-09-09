@@ -2,16 +2,19 @@ import mongoose, { Schema } from "mongoose";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
-type UserType = {
+export type UserType = {
+  _id: mongoose.Types.ObjectId; // Add this line
   name: string;
   email: string;
   password: string;
   phone: string;
   address: string;
   role: "user" | "admin";
+  comparePassword: (password: string) => Promise<boolean>;
+  getSignedJwtToken: () => string;
 };
 
-const userSchema = new Schema<UserType>(
+const userSchema = new mongoose.Schema<UserType>(
   {
     name: { type: String, required: true },
     email: { type: String, required: true, unique: true },
@@ -22,7 +25,6 @@ const userSchema = new Schema<UserType>(
   },
   { timestamps: true }
 );
-
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(10);
