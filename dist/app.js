@@ -13,8 +13,10 @@ const slot_routes_1 = __importDefault(require("./routes/slot.routes"));
 const booking_routes_1 = __importDefault(require("./routes/booking.routes"));
 const errorHandler_1 = __importDefault(require("./middlewares/errorHandler"));
 const notFound_1 = require("./middlewares/notFound");
+const cors_1 = __importDefault(require("cors"));
 const app = (0, express_1.default)();
 // Middleware
+app.use((0, cors_1.default)());
 app.use((0, helmet_1.default)());
 app.use((0, express_mongo_sanitize_1.default)());
 app.use(express_1.default.json());
