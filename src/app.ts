@@ -8,10 +8,11 @@ import slotRoutes from "./routes/slot.routes";
 import bookingRoutes from "./routes/booking.routes";
 import errorHandler from "./middlewares/errorHandler";
 import { notFoundHandler } from "./middlewares/notFound";
-
+import cors from "cors";
 const app = express();
 
 // Middleware
+app.use(cors());
 app.use(helmet());
 app.use(mongoSanitize());
 app.use(express.json());
