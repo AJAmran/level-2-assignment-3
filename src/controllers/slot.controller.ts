@@ -17,22 +17,24 @@ export const createSlots = async (req: Request, res: Response) => {
     const totalDuration = endMinutes - startMinutes;
     const numberOfSlots = totalDuration / slotDuration;
 
-    const slots = [];
-    for (let i = 0; i < numberOfSlots; i++) {
+    // Prepare slots in batch
+    const slots = Array.from({ length: numberOfSlots }, (_, i) => {
       const slotStart = new Date(date);
       slotStart.setMinutes(startMinutes + i * slotDuration);
       const slotEnd = new Date(slotStart);
       slotEnd.setMinutes(slotStart.getMinutes() + slotDuration);
 
-      const slot = await Slot.create({
+      return {
         room,
         date,
         startTime: slotStart.toLocaleTimeString("en-US", { hour12: false }),
         endTime: slotEnd.toLocaleTimeString("en-US", { hour12: false }),
         isBooked: false, // Ensure the new slots are unbooked
-      });
-      slots.push(slot);
-    }
+      };
+    });
+
+    // Insert slots in bulk
+    await Slot.insertMany(slots);
 
     return successResponse(res, "Slots created successfully", slots, 201);
   } catch (error) {

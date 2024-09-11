@@ -26,21 +26,22 @@ const createSlots = (req, res) => __awaiter(void 0, void 0, void 0, function* ()
         const endMinutes = parseInt(endTime.split(":")[0]) * 60 + parseInt(endTime.split(":")[1]);
         const totalDuration = endMinutes - startMinutes;
         const numberOfSlots = totalDuration / slotDuration;
-        const slots = [];
-        for (let i = 0; i < numberOfSlots; i++) {
+        // Prepare slots in batch
+        const slots = Array.from({ length: numberOfSlots }, (_, i) => {
             const slotStart = new Date(date);
             slotStart.setMinutes(startMinutes + i * slotDuration);
             const slotEnd = new Date(slotStart);
             slotEnd.setMinutes(slotStart.getMinutes() + slotDuration);
-            const slot = yield slot_model_1.default.create({
+            return {
                 room,
                 date,
                 startTime: slotStart.toLocaleTimeString("en-US", { hour12: false }),
                 endTime: slotEnd.toLocaleTimeString("en-US", { hour12: false }),
                 isBooked: false, // Ensure the new slots are unbooked
-            });
-            slots.push(slot);
-        }
+            };
+        });
+        // Insert slots in bulk
+        yield slot_model_1.default.insertMany(slots);
         return (0, responseHandler_1.successResponse)(res, "Slots created successfully", slots, 201);
     }
     catch (error) {

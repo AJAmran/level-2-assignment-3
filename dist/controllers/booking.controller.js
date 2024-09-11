@@ -20,19 +20,23 @@ const responseHandler_1 = require("../utils/responseHandler");
 const createBooking = (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { date, slots, room, user } = req.body;
     try {
-        // Find slots that are not booked
-        const selectedSlots = yield slot_model_1.default.find({
-            _id: { $in: slots },
-            isBooked: false,
-        });
-        if (selectedSlots.length !== slots.length) {
-            return (0, responseHandler_1.errorResponse)(res, "Some slots are already booked", [], 400);
-        }
-        // Fetch room details to calculate total amount
-        const selectedRoom = yield room_model_1.default.findById(room);
+        // Fetch slots and room details in parallel
+        const [selectedSlots, selectedRoom] = yield Promise.all([
+            slot_model_1.default.find({
+                _id: { $in: slots },
+                isBooked: false,
+            }),
+            room_model_1.default.findById(room),
+        ]);
+        // Check if the room exists
         if (!selectedRoom) {
             return (0, responseHandler_1.errorResponse)(res, "Room not found", [], 404);
         }
+        // Check if all selected slots are available
+        if (selectedSlots.length !== slots.length) {
+            return (0, responseHandler_1.errorResponse)(res, "Some slots are already booked", [], 400);
+        }
+        // Calculate the total amount
         const totalAmount = selectedSlots.length * selectedRoom.pricePerSlot;
         // Create a new booking
         const booking = yield booking_model_1.default.create({

@@ -23,6 +23,7 @@ const userSchema = new mongoose_1.default.Schema({
     address: { type: String, required: true },
     role: { type: String, default: "user" },
 }, { timestamps: true });
+userSchema.index({ email: 1 }, { unique: true });
 userSchema.pre("save", function (next) {
     return __awaiter(this, void 0, void 0, function* () {
         if (!this.isModified("password"))

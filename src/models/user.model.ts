@@ -3,7 +3,7 @@ import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 
 export type UserType = {
-  _id: mongoose.Types.ObjectId; // Add this line
+  _id: mongoose.Types.ObjectId;
   name: string;
   email: string;
   password: string;
@@ -13,6 +13,8 @@ export type UserType = {
   comparePassword: (password: string) => Promise<boolean>;
   getSignedJwtToken: () => string;
 };
+
+
 
 const userSchema = new mongoose.Schema<UserType>(
   {
@@ -25,6 +27,11 @@ const userSchema = new mongoose.Schema<UserType>(
   },
   { timestamps: true }
 );
+
+
+
+userSchema.index({ email: 1 }, { unique: true });
+
 userSchema.pre("save", async function (next) {
   if (!this.isModified("password")) return next();
   const salt = await bcrypt.genSalt(10);

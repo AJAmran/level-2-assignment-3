@@ -33,5 +33,6 @@ const roomSchema = new mongoose_1.Schema({
     amenities: { type: [String], default: [] },
     isDeleted: { type: Boolean, default: false },
 }, { timestamps: true });
+roomSchema.index({ roomNo: 1 }, { unique: true });
 const Room = mongoose_1.default.model("Room", roomSchema);
 exports.default = Room;

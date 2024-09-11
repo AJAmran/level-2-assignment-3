@@ -8,22 +8,26 @@ export const createBooking = async (req: Request, res: Response) => {
   const { date, slots, room, user } = req.body;
 
   try {
-    // Find slots that are not booked
-    const selectedSlots = await Slot.find({
-      _id: { $in: slots },
-      isBooked: false,
-    });
+    // Fetch slots and room details in parallel
+    const [selectedSlots, selectedRoom] = await Promise.all([
+      Slot.find({
+        _id: { $in: slots },
+        isBooked: false,
+      }),
+      Room.findById(room),
+    ]);
 
-    if (selectedSlots.length !== slots.length) {
-      return errorResponse(res, "Some slots are already booked", [], 400);
-    }
-
-    // Fetch room details to calculate total amount
-    const selectedRoom = await Room.findById(room);
+    // Check if the room exists
     if (!selectedRoom) {
       return errorResponse(res, "Room not found", [], 404);
     }
 
+    // Check if all selected slots are available
+    if (selectedSlots.length !== slots.length) {
+      return errorResponse(res, "Some slots are already booked", [], 400);
+    }
+
+    // Calculate the total amount
     const totalAmount = selectedSlots.length * selectedRoom.pricePerSlot;
 
     // Create a new booking
